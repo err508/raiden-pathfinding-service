@@ -12,7 +12,34 @@ from pathfinder.model.channel_view import ChannelView
 from pathfinder.token_network import TokenNetwork
 from pathfinder.utils.types import Address
 
-
+def test_routing_benchmark(
+    token_networks: List[TokenNetwork],
+    populate_token_networks_random: None
+):
+    G = token_networks[0].G
+    token_network = token_networks[0]
+    value = 100
+    G = token_networks[0].G
+    token_network = token_networks[0]
+    times = []
+    start = time.time()
+    for i in range(100):
+        tic = time.time()
+        source, target = random.sample(G.nodes, 2)
+        paths = token_network.get_paths(source, target, value=value, k=5, bias=0.0)
+        toc = time.time()
+        times.append(toc - tic)
+    end = time.time()
+    for path_object in paths:
+        path = path_object['path']
+        fees = path_object['estimated_fee']
+        for node1, node2 in zip(path[:-1], path[1:]):
+            view = G[node1][node2]['view']
+            print('fee = ', view.fee, 'capacity = ', view.capacity)
+        print('fee sum = ', fees)
+    print(paths)
+    print(np.mean(np.array(times)), np.min(np.array(times)), np.max(np.array(times)))
+    print("total_runtime = {}".format(end-start))
 def test_routing_benchmark(
     token_networks: List[TokenNetwork],
     populate_token_networks_random: None

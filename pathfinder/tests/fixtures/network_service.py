@@ -5,6 +5,7 @@ import pytest
 from coincurve import PrivateKey
 from eth_utils import remove_0x_prefix
 from raiden_contracts.contract_manager import ContractManager
+from raiden_libs.blockchain import BlockchainListener
 from raiden_libs.utils import EMPTY_MERKLE_ROOT, private_key_to_address
 from web3 import Web3
 
@@ -20,6 +21,22 @@ def forge_fee_signature(private_key: str, fee: float) -> bytes:
     private_key_ecdsa = PrivateKey.from_hex(remove_0x_prefix(private_key))
     return private_key_ecdsa.sign_recoverable(fee_msg)
 
+"""@pytest.fixture
+def populate_token_networks_integrated(
+    token_networks: List[TokenNetwork],
+    blockchain_listener,
+    ethereum_tester,
+):"""
+
+@pytest.fixture
+def blockchain_listener(web3, contracts_manager):
+    blockchain_listener = BlockchainListener(
+        web3,
+        contracts_manager,
+        'TokenNetwork',
+        poll_interval=0,
+    )
+    return blockchain_listener
 
 @pytest.fixture
 def populate_token_networks_random(
@@ -166,7 +183,6 @@ def populate_token_networks_simple(
 def pathfinding_service(
         web3: Web3,
         contracts_manager: ContractManager,
-        populate_token_networks_simple: None,
         token_networks: List[TokenNetwork]
 ) -> PathfindingService:
     # TODO: replace with a pathfinding service that actually syncs with the tester chain.
@@ -174,8 +190,8 @@ def pathfinding_service(
         web3,
         contracts_manager,
         transport=Mock(),
-        token_network_listener=Mock(),
-        token_network_registry_listener=Mock()
+        token_network_listener=blockchain_listener(web3, contracts_manager),
+        token_network_registry_listener=Mock(),
     )
     pathfinding_service.token_networks = {
         token_network.address: token_network

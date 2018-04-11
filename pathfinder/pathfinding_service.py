@@ -85,7 +85,6 @@ class PathfindingService(gevent.Greenlet):
         register_error_handler(error_handler)
         self.transport.start()
         self.token_network_listener.run()
-
         self.is_running.wait()
 
     def stop(self):
@@ -112,7 +111,7 @@ class PathfindingService(gevent.Greenlet):
 
     def handle_channel_opened(self, event):
         token_network = self._get_token_network(event)
-
+        print('ping')
         if token_network:
             log.debug('Received ChannelOpened event for token network {}'.format(
                 token_network.address

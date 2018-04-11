@@ -82,7 +82,6 @@ class TokenNetwork:
         Corresponds to the ChannelNewDeposit event. Called by the contract event listener. """
 
         assert is_checksum_address(receiver)
-
         try:
             participant1, participant2 = self.channel_id_to_addresses[channel_id]
 
